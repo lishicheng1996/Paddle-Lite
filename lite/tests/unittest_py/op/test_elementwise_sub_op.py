@@ -61,7 +61,7 @@ class TestElementwiseSubOp(AutoScanTest):
             Place(TargetType.ARM, PrecisionType.FP32),
             Place(TargetType.Host, PrecisionType.FP32)
         ]
-        # self.enable_testing_on_place(places=metal_places)
+        self.enable_testing_on_place(places=metal_places)
         self.enable_testing_on_place(
             TargetType.ARM,
             PrecisionType.FP16,
@@ -150,7 +150,7 @@ class TestElementwiseSubOp(AutoScanTest):
         return self.get_predictor_configs(), ["elementwise_sub"], (1e-5, 1e-5)
 
     def add_ignore_pass_case(self):
-        def _teller2(program_config, predictor_config):
+        def _teller1(program_config, predictor_config):
             target_type = predictor_config.target()
             in_x_shape = list(program_config.inputs["input_data_x"].shape)
             in_y_shape = list(program_config.inputs["input_data_y"].shape)
@@ -163,7 +163,7 @@ class TestElementwiseSubOp(AutoScanTest):
                     return True
 
         self.add_ignore_check_case(
-            _teller2, IgnoreReasons.PADDLELITE_NOT_SUPPORT,
+            _teller1, IgnoreReasons.PADDLELITE_NOT_SUPPORT,
             "Lite does not support this op in a specific case on Metal. We need to fix it as soon as possible."
         )
 
@@ -189,7 +189,7 @@ class TestElementwiseSubOp(AutoScanTest):
             in_y_shape = list(program_config.inputs["input_data_y"].shape)
             if target_type not in [
                     TargetType.ARM, TargetType.Host, TargetType.X86,
-                    TargetType.OpenCL
+                    TargetType.OpenCL, TargetType.Metal
             ]:
                 if len(in_x_shape) == 0 or len(in_y_shape) == 0:
                     return True

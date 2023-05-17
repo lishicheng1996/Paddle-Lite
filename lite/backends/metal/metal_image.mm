@@ -71,8 +71,11 @@ void MetalImage::InitTexture() {
                 dim.emplace_back(pad_to_four_dim_[i]);
             });
         } break;
-        case 0:
-            break;
+        case 0: {
+            for (auto i: pad_to_four_dim_) {
+                dim.emplace_back(i);
+            }
+        } break;
         default:
             LOG(FATAL) << "metal_image: Dim size is error";
     }
@@ -101,6 +104,9 @@ void MetalImage::InitTexture() {
                 desc_.arrayLength = static_cast<NSUInteger>(((dim[3] + 3) / 4) * (dim[0]));
                 break;
             case 0:
+                desc_.width = static_cast<NSUInteger>(dim[2]);
+                desc_.height = static_cast<NSUInteger>(dim[1]);
+                desc_.arrayLength = static_cast<NSUInteger>(((dim[3] + 3) / 4) * (dim[0]));
                 break;
             default:
                 LOG(FATAL) << "metal_image: Dim size is error";
@@ -118,8 +124,11 @@ void MetalImage::InitTexture() {
                 desc_.height = static_cast<NSUInteger>(dim[1]);
                 desc_.arrayLength = static_cast<NSUInteger>(((dim[3] + 3) / 4) * (dim[0]));
             } break;
-            case 0:
-                break;
+            case 0: {
+                desc_.width = static_cast<NSUInteger>(dim[2]);
+                desc_.height = static_cast<NSUInteger>(dim[1]);
+                desc_.arrayLength = static_cast<NSUInteger>(((dim[3] + 3) / 4) * (dim[0]));
+            } break;
             default:
                 LOG(FATAL) << "metal_image: Dim size is error";
         }

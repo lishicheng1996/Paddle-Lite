@@ -59,13 +59,13 @@ class TestTanOp(AutoScanTest):
                 return np.random.randint(kwargs["low"], kwargs["high"],
                                          kwargs["shape"]).astype(np.int64)
             elif kwargs["type"] == "float32":
-                return (kwargs["high"] - kwargs["low"]) * np.random.random(
-                    kwargs["shape"]).astype(np.float32) + kwargs["low"]
+                return np.random.random(kwargs["shape"]).astype(np.float32)
 
         in_shape = draw(
             st.lists(
                 st.integers(
                     min_value=1, max_value=8), min_size=4, max_size=4))
+        in_shape = draw(st.sampled_from([in_shape, []]))
 
         tan_op = OpConfig(
             type="tan",
@@ -90,7 +90,19 @@ class TestTanOp(AutoScanTest):
         return self.get_predictor_configs(), ["tan"], (1e-5, 1e-5)
 
     def add_ignore_pass_case(self):
-        pass
+        def _teller1(program_config, predictor_config):
+            target_type = predictor_config.target()
+            in_x_shape = list(program_config.inputs["input_data"].shape)
+            if target_type not in [
+                    TargetType.ARM, TargetType.Host, TargetType.X86,
+                    TargetType.Metal, TargetType.OpenCL
+            ]:
+                if len(in_x_shape) == 0:
+                    return True
+
+        self.add_ignore_check_case(_teller1,
+                                   IgnoreReasons.PADDLELITE_NOT_SUPPORT,
+                                   "Only test 0D-tensor on CPU(ARM/Host) now.")
 
     def test(self, *args, **kwargs):
         self.run_and_statis(quant=False, max_examples=100)

@@ -44,7 +44,7 @@ class TestCastOp(AutoScanTest):
             Place(TargetType.ARM, PrecisionType.FP32),
             Place(TargetType.Host, PrecisionType.FP32)
         ]
-        # self.enable_testing_on_place(places=metal_places)
+        self.enable_testing_on_place(places=metal_places)
         self.enable_testing_on_place(TargetType.NNAdapter, PrecisionType.FP32)
         self.enable_devices_on_nnadapter(device_names=[
             "cambricon_mlu", "nvidia_tensorrt", "intel_openvino"
@@ -116,7 +116,8 @@ class TestCastOp(AutoScanTest):
             in_dtype = program_config.ops[0].attrs["in_dtype"]
             out_dtype = program_config.ops[0].attrs["out_dtype"]
             if predictor_config.target() == TargetType.Metal:
-                if len(x_shape) != 4 or in_dtype != 5 or out_dtype != 5:
+                if len(x_shape) not in [0, 4
+                                        ] or in_dtype != 5 or out_dtype != 5:
                     return True
 
         self.add_ignore_check_case(
@@ -142,7 +143,7 @@ class TestCastOp(AutoScanTest):
             in_x_shape = list(program_config.inputs["input_data"].shape)
             if target_type not in [
                     TargetType.ARM, TargetType.Host, TargetType.X86,
-                    TargetType.OpenCL
+                    TargetType.OpenCL, TargetType.Metal
             ]:
                 if len(in_x_shape) == 0:
                     return True

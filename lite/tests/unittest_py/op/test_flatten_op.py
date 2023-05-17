@@ -54,7 +54,7 @@ class TestFlattenOp(AutoScanTest):
             Place(TargetType.ARM, PrecisionType.FP32),
             Place(TargetType.Host, PrecisionType.FP32)
         ]
-        # self.enable_testing_on_place(places=metal_places)
+        self.enable_testing_on_place(places=metal_places)
         self.enable_testing_on_place(TargetType.NNAdapter, PrecisionType.FP32)
         self.enable_devices_on_nnadapter(
             device_names=["cambricon_mlu", "intel_openvino"])
@@ -69,6 +69,7 @@ class TestFlattenOp(AutoScanTest):
             st.lists(
                 st.integers(
                     min_value=1, max_value=8), min_size=0, max_size=4))
+        in_shape = draw(st.sampled_from([in_shape, []]))
 
         def generate_input(*args, **kwargs):
             if kwargs["type"] == "int32":
@@ -130,10 +131,11 @@ class TestFlattenOp(AutoScanTest):
             in_shape = list(program_config.inputs["input_data"].shape)
             axis = program_config.ops[0].attrs["axis"]
             if target_type == TargetType.Metal:
-                if len(in_shape) != 4 \
-                    or in_shape[0] != 1 \
-                    or axis != 1:
-                    return True
+                if len(in_shape) != 0:
+                    if len(in_shape) != 4 \
+                        or in_shape[0] != 1 \
+                        or axis != 1:
+                        return True
 
         self.add_ignore_check_case(
             _teller1, IgnoreReasons.PADDLELITE_NOT_SUPPORT,
@@ -158,7 +160,7 @@ class TestFlattenOp(AutoScanTest):
             in_x_shape = list(program_config.inputs["input_data"].shape)
             if target_type not in [
                     TargetType.ARM, TargetType.Host, TargetType.X86,
-                    TargetType.OpenCL
+                    TargetType.OpenCL, TargetType.Metal
             ]:
                 if len(in_x_shape) == 0:
                     return True
